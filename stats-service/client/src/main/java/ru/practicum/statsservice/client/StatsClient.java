@@ -19,7 +19,7 @@ import java.util.Map;
 @Service
 @AllArgsConstructor
 public class StatsClient {
-    private final static DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final RestTemplate restTemplate = new RestTemplate();
     @Value("stats-service.url")
     private String baseUrl;

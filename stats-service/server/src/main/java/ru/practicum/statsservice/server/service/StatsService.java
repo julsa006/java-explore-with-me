@@ -15,7 +15,7 @@ public class StatsService {
     StatsRepository statsRepository;
 
     public void registerHit(String app, String uri, String ip, LocalDateTime timestamp) {
-        statsRepository.save(new Hit(null, app, uri, ip, timestamp));
+        statsRepository.save(new Hit(app, uri, ip, timestamp, null));
     }
 
     public List<StatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
