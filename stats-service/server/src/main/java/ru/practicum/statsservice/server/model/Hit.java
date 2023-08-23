@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "hits")
 public class Hit {
-    String app;
-    String uri;
-    String ip;
-    LocalDateTime timestamp;
+    private String app;
+    private String uri;
+    private String ip;
+    private LocalDateTime timestamp;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

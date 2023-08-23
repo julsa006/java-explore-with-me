@@ -30,7 +30,7 @@ public class StatsClient {
         ResponseEntity response = restTemplate.postForEntity(baseUrl + "/hit",
                 new HitDto(appName, uri, ip, LocalDateTime.now()), Void.class);
         if (response.getStatusCode() != HttpStatus.CREATED) {
-            throw new RequestFaildException(response.getBody().toString(), response.getStatusCode());
+            throw new RequestFailedException(response.getBody().toString(), response.getStatusCode());
         }
     }
 
@@ -46,7 +46,7 @@ public class StatsClient {
         }
         ResponseEntity<StatsDto[]> response = restTemplate.getForEntity(baseUrl + requestParams, StatsDto[].class, parameters);
         if (response.getStatusCode() != HttpStatus.OK) {
-            throw new RequestFaildException(response.getBody().toString(), response.getStatusCode());
+            throw new RequestFailedException(response.getBody().toString(), response.getStatusCode());
         }
         return Arrays.asList(response.getBody());
     }
