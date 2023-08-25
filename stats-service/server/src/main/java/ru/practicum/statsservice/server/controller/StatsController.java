@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.statsservice.dto.HitDto;
 import ru.practicum.statsservice.dto.StatsDto;
-import ru.practicum.statsservice.server.exceptions.ValidationError;
+import ru.practicum.statsservice.server.exceptions.ValidationException;
 import ru.practicum.statsservice.server.service.StatsService;
 
 import java.time.LocalDateTime;
@@ -31,7 +31,7 @@ public class StatsController {
                                    @RequestParam(required = false) List<String> uris,
                                    @RequestParam(defaultValue = "false") boolean unique) {
         if (start.isAfter(end)) {
-            throw new ValidationError("Start date is after end date");
+            throw new ValidationException("Start date is after end date");
         }
         return statsService.getStats(start, end, uris, unique);
     }

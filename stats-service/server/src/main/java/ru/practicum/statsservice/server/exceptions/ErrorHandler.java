@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ErrorHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(final ValidationError e) {
+    public ErrorResponse handleMethodArgumentNotValidException(final ValidationException e) {
         return new ErrorResponse(
                 e.getMessage()
         );
