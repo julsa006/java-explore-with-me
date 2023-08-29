@@ -19,6 +19,7 @@ import ru.practicum.statsservice.client.StatsClient;
 import ru.practicum.statsservice.dto.StatsDto;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -206,7 +207,20 @@ public class EventService {
             default:
                 throw new ValidationException(String.format("Sort by %s does not exist", sort));
         }
-        return setViews(eventRepository.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, page));
+        List<Event> result = setViews(eventRepository.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, page));
+        if (sort.equals("VIEWS")) {
+            result = getSortedByViews(result, from, size);
+        }
+        return result;
+    }
+
+    private List<Event> getSortedByViews(List<Event> events, int from, int size) {
+        return events.stream().sorted(new Comparator<Event>() {
+            @Override
+            public int compare(Event e1, Event e2) {
+                return Long.compare(e1.getViews(), e2.getViews());
+            }
+        }).skip(from).limit(size).collect(Collectors.toList());
     }
 
     private Event setViews(Event event) {
