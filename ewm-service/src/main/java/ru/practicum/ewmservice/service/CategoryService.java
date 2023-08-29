@@ -12,18 +12,21 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
+    @Transactional
     public Category createCategory(String name) {
         return categoryRepository.save(new Category(null, name));
     }
 
+    @Transactional
     public void deleteCategory(Long id) {
         categoryRepository.deleteById(id);
     }
 
+    @Transactional
     public Category updateCategory(Long id, String name) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));

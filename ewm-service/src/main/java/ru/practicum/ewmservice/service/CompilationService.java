@@ -14,21 +14,24 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class CompilationService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
 
 
+    @Transactional
     public Compilation createCompilation(String title, Boolean pinned, List<Long> eventIds) {
         List<Event> events = eventIds == null ? List.of() : eventRepository.findAllById(eventIds);
         return compilationRepository.save(new Compilation(null, title, pinned, events));
     }
 
+    @Transactional
     public void deleteCompilation(Long compId) {
         compilationRepository.deleteById(compId);
     }
 
+    @Transactional
     public Compilation updateCompilation(Long compId, String title, Boolean pinned, List<Long> events) {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new EntityNotFoundException("Compilation not found"));

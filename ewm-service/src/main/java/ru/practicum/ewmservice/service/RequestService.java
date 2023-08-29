@@ -16,12 +16,13 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class RequestService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
 
+    @Transactional
     public Request createRequest(Long userId, Long eventId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -46,6 +47,7 @@ public class RequestService {
     }
 
 
+    @Transactional
     public Request cancelRequest(Long userId, Long requestId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -75,6 +77,7 @@ public class RequestService {
         return requestRepository.findAllByEventId(eventId);
     }
 
+    @Transactional
     public UpdateRequestStatusResponse updateRequestsStatus(Long userId, Long eventId,
                                                             List<Long> requestIds, RequestStatus status) {
         User user = userRepository.findById(userId)

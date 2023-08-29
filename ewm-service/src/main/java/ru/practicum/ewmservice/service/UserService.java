@@ -12,13 +12,15 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
 
+    @Transactional
     public User createUser(String name, String email) {
         return userRepository.save(new User(null, name, email));
     }
+
 
     public List<User> getUsers(int from, int size) {
         PageRequest page = PageRequest.of(from / size, size);
@@ -29,6 +31,7 @@ public class UserService {
         return userRepository.findAllByIdIn(ids);
     }
 
+    @Transactional
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }

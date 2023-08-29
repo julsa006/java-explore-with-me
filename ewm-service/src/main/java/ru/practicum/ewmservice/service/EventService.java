@@ -25,13 +25,14 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final StatsClient statsClient;
 
+    @Transactional
     public Event createEvent(Long userId, String annotation, Long categoryId, String description,
                              LocalDateTime eventDate, double lat, double lon, boolean paid, int participantLimit,
                              boolean requestModeration, String title) {
@@ -68,6 +69,7 @@ public class EventService {
     }
 
 
+    @Transactional
     public Event updateUserEvent(Long userId, Long eventId, String annotation, Long categoryId, String description,
                                  LocalDateTime eventDate, Double lat, Double lon, Boolean paid, Integer participantLimit,
                                  Boolean requestModeration, String title, UserEventStateAction stateAction) {
@@ -96,6 +98,7 @@ public class EventService {
         return setViews(eventRepository.save(event));
     }
 
+    @Transactional
     public Event updateAdminEvent(Long eventId, String annotation, Long categoryId, String description,
                                   LocalDateTime eventDate, Double lat, Double lon, Boolean paid,
                                   Integer participantLimit, Boolean requestModeration, String title,
@@ -192,9 +195,6 @@ public class EventService {
 
     public List<Event> getEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
                                  LocalDateTime rangeEnd, boolean onlyAvailable, String sort, int from, int size) {
-//        if (categoryRepository.findAllById(categories).size() != categories.size()){
-//            throw new ValidationException("Categories doesnt exist");
-//        }
         PageRequest page;
         switch (sort) {
             case "EVENT_DATE":
