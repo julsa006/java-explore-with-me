@@ -1,13 +1,18 @@
 package ru.practicum.ewmservice.dto.event;
 
-import lombok.Value;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.ewmservice.dto.category.CategoryDto;
 import ru.practicum.ewmservice.dto.user.UserDto;
 import ru.practicum.ewmservice.model.EventState;
 
 import java.time.LocalDateTime;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class EventDto {
     Long id;
     String annotation;

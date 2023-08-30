@@ -3,6 +3,7 @@ package ru.practicum.ewmservice.controller.privates;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewmservice.dto.event.*;
 import ru.practicum.ewmservice.dto.request.RequestDto;
@@ -13,6 +14,8 @@ import ru.practicum.ewmservice.service.EventService;
 import ru.practicum.ewmservice.service.RequestService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/users/{userId}/events")
 @AllArgsConstructor
+@Validated
 public class PrivateEventController {
     private final EventService eventService;
     private final RequestService requestService;
@@ -39,8 +43,8 @@ public class PrivateEventController {
 
     @GetMapping()
     public List<EventDto> getEvents(@PathVariable Long userId,
-                                    @RequestParam(defaultValue = "0") int from,
-                                    @RequestParam(defaultValue = "10") int size) {
+                                    @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                    @RequestParam(defaultValue = "10") @Positive int size) {
         return eventService.getUserEvents(userId, from, size).stream()
                 .map(EventMapper::toEventDto)
                 .collect(Collectors.toList());

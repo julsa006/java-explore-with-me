@@ -1,14 +1,17 @@
 package ru.practicum.ewmservice.controller.publics;
 
 import lombok.AllArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewmservice.dto.event.EventDto;
 import ru.practicum.ewmservice.dto.event.EventMapper;
-import ru.practicum.ewmservice.exceptions.ValidationException;
+import ru.practicum.ewmservice.model.GetEventsRequest;
 import ru.practicum.ewmservice.service.EventService;
 import ru.practicum.statsservice.client.StatsClient;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +19,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/events")
 @AllArgsConstructor
+@Validated
 public class EventController {
     private final EventService eventService;
     private final StatsClient statsClient;
@@ -34,21 +38,21 @@ public class EventController {
                                     @RequestParam(required = false) LocalDateTime rangeEnd,
                                     @RequestParam(defaultValue = "false") boolean onlyAvailable,
                                     @RequestParam(defaultValue = "EVENT_DATE") String sort,
-                                    @RequestParam(defaultValue = "0") int from,
-                                    @RequestParam(defaultValue = "10") int size,
+                                    @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                    @RequestParam(defaultValue = "10") @Positive int size,
                                     HttpServletRequest request) {
         statsClient.hit(request.getRequestURI(), request.getRemoteAddr());
-        if (rangeStart == null && rangeEnd == null) {
-            rangeStart = LocalDateTime.now();
-        }
-        if (rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
-            throw new ValidationException("Start date is after end date");
-        }
-        if (sort == null) {
-            sort = "EVENT_DATE";
-        }
-        return eventService.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size).stream()
-                .map(EventMapper::toEventDto).collect(Collectors.toList());
+        return eventService.getEvents(GetEventsRequest.builder()
+                        .text(text)
+                        .categories(categories)
+                        .paid(paid)
+                        .rangeStart(rangeStart)
+                        .rangeEnd(rangeEnd)
+                        .onlyAvailable(onlyAvailable)
+                        .sort(sort)
+                        .from(from)
+                        .size(size).build())
+                .stream().map(EventMapper::toEventDto).collect(Collectors.toList());
     }
 
 

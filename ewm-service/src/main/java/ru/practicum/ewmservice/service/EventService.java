@@ -12,6 +12,7 @@ import ru.practicum.ewmservice.exceptions.IllegalEntityStateException;
 import ru.practicum.ewmservice.exceptions.ValidationException;
 import ru.practicum.ewmservice.model.Event;
 import ru.practicum.ewmservice.model.EventState;
+import ru.practicum.ewmservice.model.GetEventsRequest;
 import ru.practicum.ewmservice.repository.CategoryRepository;
 import ru.practicum.ewmservice.repository.EventRepository;
 import ru.practicum.ewmservice.repository.UserRepository;
@@ -28,6 +29,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Transactional(readOnly = true)
 public class EventService {
+    private static final LocalDateTime MIN_DATE = LocalDateTime.of(2000, 1, 1, 0, 0, 0);
+    private static final LocalDateTime MAX_DATE = LocalDateTime.of(2100, 1, 1, 0, 0, 0);
+    private static final String EVENTS_URI = "/events/";
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
@@ -194,33 +198,35 @@ public class EventService {
         return setViews(event);
     }
 
-    public List<Event> getEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
-                                 LocalDateTime rangeEnd, boolean onlyAvailable, String sort, int from, int size) {
+    public List<Event> getEvents(GetEventsRequest request) {
+        if (request.getRangeStart() != null && request.getRangeEnd() != null
+                && request.getRangeStart().isAfter(request.getRangeEnd())) {
+            throw new ValidationException("Start date is after end date");
+        }
+        if (request.getRangeStart() == null && request.getRangeEnd() == null) {
+            request.setRangeStart(LocalDateTime.now());
+        }
         PageRequest page;
-        switch (sort) {
+        switch (request.getSort()) {
             case "EVENT_DATE":
-                page = PageRequest.of(from / size, size, Sort.by("eventDate").ascending());
+                page = PageRequest.of(request.getFrom() / request.getSize(), request.getSize(), Sort.by("eventDate").ascending());
                 break;
             case "VIEWS":
                 page = null;
                 break;
             default:
-                throw new ValidationException(String.format("Sort by %s does not exist", sort));
+                throw new ValidationException(String.format("Sort by %s does not exist", request.getSort()));
         }
-        List<Event> result = setViews(eventRepository.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, page));
-        if (sort.equals("VIEWS")) {
-            result = getSortedByViews(result, from, size);
+        List<Event> result = setViews(eventRepository.getEvents(request, page));
+        if (request.getSort().equals("VIEWS")) {
+            result = getSortedByViews(result, request.getFrom(), request.getSize());
         }
         return result;
     }
 
     private List<Event> getSortedByViews(List<Event> events, int from, int size) {
-        return events.stream().sorted(new Comparator<Event>() {
-            @Override
-            public int compare(Event e1, Event e2) {
-                return Long.compare(e1.getViews(), e2.getViews());
-            }
-        }).skip(from).limit(size).collect(Collectors.toList());
+        return events.stream().sorted(Comparator.comparingLong(Event::getViews))
+                .skip(from).limit(size).collect(Collectors.toList());
     }
 
     private Event setViews(Event event) {
@@ -230,19 +236,19 @@ public class EventService {
 
     private List<Event> setViews(List<Event> events) {
         List<String> allUris = events.stream()
-                .map((e) -> String.format("/events/%d", e.getId()))
+                .map(e -> EVENTS_URI + e.getId())
                 .collect(Collectors.toList());
 
-        List<StatsDto> stats = statsClient.getStats(LocalDateTime.of(2000, 1, 1, 0, 0, 0), LocalDateTime.of(2100, 1, 1, 0, 0, 0), allUris, true);
+        List<StatsDto> stats = statsClient.getStats(MIN_DATE, MAX_DATE, allUris, true);
 
         Map<Long, Long> viewsMap = stats.stream()
-                .filter((e) -> e.getUri().startsWith("/events/"))
+                .filter(e -> e.getUri().startsWith(EVENTS_URI))
                 .collect(Collectors.groupingBy(
-                        (StatsDto s) -> Long.parseLong(s.getUri().substring("/events/".length())),
+                        s -> Long.parseLong(s.getUri().substring(EVENTS_URI.length())),
                         Collectors.summingLong(StatsDto::getHits)
                 ));
 
-        events.forEach((e) -> e.setViews(viewsMap.getOrDefault(e.getId(), 0L)));
+        events.forEach(e -> e.setViews(viewsMap.getOrDefault(e.getId(), 0L)));
         return events;
     }
 

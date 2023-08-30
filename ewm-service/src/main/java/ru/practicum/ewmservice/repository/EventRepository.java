@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import ru.practicum.ewmservice.model.Event;
 import ru.practicum.ewmservice.model.EventState;
+import ru.practicum.ewmservice.model.GetEventsRequest;
 import ru.practicum.ewmservice.model.QEvent;
 
 import java.time.LocalDateTime;
@@ -24,33 +25,30 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
     List<Event> getAdminEvents(List<Long> users, List<EventState> states, List<Long> categories,
                                LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable page);
 
-    default List<Event> getEvents(String text,
-                                  List<Long> categories, Boolean paid,
-                                  LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                  boolean onlyAvailable, Pageable page) {
+    default List<Event> getEvents(GetEventsRequest request, Pageable page) {
         BooleanBuilder bb = new BooleanBuilder();
         QEvent qEvent = QEvent.event;
 
         bb.and(qEvent.state.eq(EventState.PUBLISHED));
-        if (text != null) {
-            String pattern = String.format("%%%s%%", text);
+        if (request.getText() != null) {
+            String pattern = String.format("%%%s%%", request.getText());
             bb.and(qEvent.annotation.likeIgnoreCase(pattern)
                     .or(qEvent.description.likeIgnoreCase(pattern)));
         }
 
-        if (categories != null) {
-            bb.and(qEvent.category.id.in(categories));
+        if (request.getCategories() != null) {
+            bb.and(qEvent.category.id.in(request.getCategories()));
         }
-        if (paid != null) {
-            bb.and(qEvent.paid.eq(paid));
+        if (request.getPaid() != null) {
+            bb.and(qEvent.paid.eq(request.getPaid()));
         }
-        if (rangeStart != null) {
-            bb.and(qEvent.eventDate.after(rangeStart));
+        if (request.getRangeStart() != null) {
+            bb.and(qEvent.eventDate.after(request.getRangeStart()));
         }
-        if (rangeEnd != null) {
-            bb.and(qEvent.eventDate.before(rangeEnd));
+        if (request.getRangeEnd() != null) {
+            bb.and(qEvent.eventDate.before(request.getRangeEnd()));
         }
-        if (onlyAvailable) {
+        if (request.isOnlyAvailable()) {
             bb.and(qEvent.participantLimit.eq(0).or(qEvent.confirmedRequests.lt(qEvent.participantLimit)));
         }
 

@@ -6,10 +6,22 @@ import ru.practicum.ewmservice.model.Event;
 
 public class EventMapper {
     public static EventDto toEventDto(Event event) {
-        return new EventDto(event.getId(), event.getAnnotation(), CategoryMapper.toCategoryDto(event.getCategory()),
-                event.getConfirmedRequests(), event.getCreatedOn(), event.getDescription(), event.getEventDate(),
-                UserMapper.toUserDto(event.getInitiator()), new LocationDto(event.getLocationLat(), event.getLocationLon()),
-                event.isPaid(), event.getParticipantLimit(), event.getPublishedOn(), event.isRequestModeration(),
-                event.getState(), event.getTitle(), event.getViews());
+        return EventDto.builder()
+                .id(event.getId())
+                .annotation(event.getAnnotation())
+                .category(CategoryMapper.toCategoryDto(event.getCategory()))
+                .confirmedRequests(event.getConfirmedRequests())
+                .createdOn(event.getCreatedOn())
+                .description(event.getDescription())
+                .eventDate(event.getEventDate())
+                .initiator(UserMapper.toUserDto(event.getInitiator()))
+                .location(new LocationDto(event.getLocationLat(), event.getLocationLon()))
+                .paid(event.isPaid())
+                .participantLimit(event.getParticipantLimit())
+                .publishedOn(event.getPublishedOn())
+                .requestModeration(event.isRequestModeration())
+                .state(event.getState())
+                .title(event.getTitle())
+                .views(event.getViews()).build();
     }
 }
