@@ -2,6 +2,7 @@ package ru.practicum.statsservice.server.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.statsservice.dto.StatsDto;
 import ru.practicum.statsservice.server.model.Hit;
 import ru.practicum.statsservice.server.repository.StatsRepository;
@@ -11,9 +12,11 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class StatsService {
     StatsRepository statsRepository;
 
+    @Transactional
     public void registerHit(String app, String uri, String ip, LocalDateTime timestamp) {
         statsRepository.save(new Hit(app, uri, ip, timestamp, null));
     }
