@@ -20,9 +20,9 @@ public class StatsController {
     private final StatsService statsService;
 
     @PostMapping("/hit")
-    public ResponseEntity registerHit(@RequestBody HitDto hit) {
+    public ResponseEntity<Void> registerHit(@RequestBody HitDto hit) {
         statsService.registerHit(hit.getApp(), hit.getUri(), hit.getIp(), hit.getTimestamp());
-        return new ResponseEntity(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/stats")

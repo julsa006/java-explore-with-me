@@ -27,7 +27,7 @@ public class StatsClient {
     private String appName;
 
     public void hit(String uri, String ip) {
-        ResponseEntity response = restTemplate.postForEntity(baseUrl + "/hit",
+        ResponseEntity<Void> response = restTemplate.postForEntity(baseUrl + "/hit",
                 new HitDto(appName, uri, ip, LocalDateTime.now()), Void.class);
         if (response.getStatusCode() != HttpStatus.CREATED) {
             throw new RequestFailedException(response.getBody().toString(), response.getStatusCode());
@@ -40,10 +40,10 @@ public class StatsClient {
         parameters.put("end", end.format(DATE_TIME_FORMATTER));
         parameters.put("unique", unique);
         parameters.put("uris", uris);
-        String requestParams = "/stats?start={start}&end={end}&unique={unique}";
+        StringBuilder requestParams = new StringBuilder("/stats?start={start}&end={end}&unique={unique}");
         if (uris != null) {
             for (String uri : uris) {
-                requestParams += String.format("&uris=%s", uri);
+                requestParams.append(String.format("&uris=%s", uri));
             }
         }
         ResponseEntity<StatsDto[]> response = restTemplate.getForEntity(baseUrl + requestParams, StatsDto[].class, parameters);
