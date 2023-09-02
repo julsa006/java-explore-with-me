@@ -11,7 +11,6 @@ import ru.practicum.ewmservice.dto.comment.CreateUpdateCommentDto;
 import ru.practicum.ewmservice.service.CommentService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/users/{userId}/comments")

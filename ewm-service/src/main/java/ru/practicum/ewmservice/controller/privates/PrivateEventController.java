@@ -18,7 +18,6 @@ import ru.practicum.ewmservice.service.EventService;
 import ru.practicum.ewmservice.service.RequestService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
