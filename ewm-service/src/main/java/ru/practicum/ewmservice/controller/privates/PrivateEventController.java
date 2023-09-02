@@ -5,15 +5,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewmservice.dto.comment.CommentDto;
+import ru.practicum.ewmservice.dto.comment.CommentMapper;
+import ru.practicum.ewmservice.dto.comment.CreateUpdateCommentDto;
 import ru.practicum.ewmservice.dto.event.*;
 import ru.practicum.ewmservice.dto.request.RequestDto;
 import ru.practicum.ewmservice.dto.request.RequestMapper;
 import ru.practicum.ewmservice.dto.request.UpdateRequestStatusResponseDto;
 import ru.practicum.ewmservice.dto.request.UpdateRequestsStatusDto;
+import ru.practicum.ewmservice.service.CommentService;
 import ru.practicum.ewmservice.service.EventService;
 import ru.practicum.ewmservice.service.RequestService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -27,6 +32,7 @@ import java.util.stream.Collectors;
 public class PrivateEventController {
     private final EventService eventService;
     private final RequestService requestService;
+    private CommentService commentService;
 
     @PostMapping
     public ResponseEntity<EventDto> createEvent(@PathVariable Long userId, @Valid @RequestBody CreateEventDto body) {
@@ -72,6 +78,14 @@ public class PrivateEventController {
                                                          @Valid @RequestBody UpdateRequestsStatusDto body) {
         return RequestMapper.toUpdateRequestStatusResponseDto(
                 requestService.updateRequestsStatus(userId, eventId, body.getRequestIds(), body.getStatus()));
+    }
+
+    @PostMapping("/{eventId}/comments")
+    public ResponseEntity<CommentDto> createComment(@PathVariable Long userId, @PathVariable Long eventId,
+                                                    @Valid @RequestBody CreateUpdateCommentDto comment) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(CommentMapper.toCommentDto(commentService.createComment(userId, eventId, comment.getText())));
     }
 
 
