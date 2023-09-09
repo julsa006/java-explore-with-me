@@ -3,9 +3,12 @@ package ru.practicum.ewmservice.controller.publics;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewmservice.dto.comment.CommentDto;
+import ru.practicum.ewmservice.dto.comment.CommentMapper;
 import ru.practicum.ewmservice.dto.event.EventDto;
 import ru.practicum.ewmservice.dto.event.EventMapper;
 import ru.practicum.ewmservice.model.GetEventsRequest;
+import ru.practicum.ewmservice.service.CommentService;
 import ru.practicum.ewmservice.service.EventService;
 import ru.practicum.statsservice.client.StatsClient;
 
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 public class EventController {
     private final EventService eventService;
     private final StatsClient statsClient;
+    private final CommentService commentService;
 
     @GetMapping("/{id}")
     public EventDto getEvent(@PathVariable Long id, HttpServletRequest request) {
@@ -55,5 +59,12 @@ public class EventController {
                 .stream().map(EventMapper::toEventDto).collect(Collectors.toList());
     }
 
+    @GetMapping("/{id}/comments")
+    public List<CommentDto> getEventComments(@PathVariable Long id,
+                                             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                             @RequestParam(defaultValue = "10") @Positive int size) {
+        return commentService.getVisibleComments(id, from, size).stream()
+                .map(CommentMapper::toCommentDto).collect(Collectors.toList());
+    }
 
 }

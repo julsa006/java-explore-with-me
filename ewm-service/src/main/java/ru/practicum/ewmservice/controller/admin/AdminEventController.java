@@ -3,11 +3,14 @@ package ru.practicum.ewmservice.controller.admin;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewmservice.dto.comment.CommentMapper;
+import ru.practicum.ewmservice.dto.comment.FullCommentDto;
 import ru.practicum.ewmservice.dto.event.EventDto;
 import ru.practicum.ewmservice.dto.event.EventMapper;
 import ru.practicum.ewmservice.dto.event.LocationDto;
 import ru.practicum.ewmservice.dto.event.UpdateAdminEventDto;
 import ru.practicum.ewmservice.model.EventState;
+import ru.practicum.ewmservice.service.CommentService;
 import ru.practicum.ewmservice.service.EventService;
 
 import javax.validation.Valid;
@@ -24,6 +27,7 @@ import java.util.stream.Collectors;
 @Validated
 public class AdminEventController {
     private final EventService eventService;
+    private CommentService commentService;
 
     @PatchMapping("/{eventId}")
     public EventDto createEvent(@PathVariable Long eventId,
@@ -45,5 +49,13 @@ public class AdminEventController {
                                     @RequestParam(defaultValue = "10") @Positive int size) {
         return eventService.getAdminEvents(users, states, categories, rangeStart, rangeEnd, from, size).stream()
                 .map(EventMapper::toEventDto).collect(Collectors.toList());
+    }
+
+    @GetMapping("/{eventId}/comments")
+    public List<FullCommentDto> getEventComments(@PathVariable Long eventId,
+                                                 @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                                 @RequestParam(defaultValue = "10") @Positive int size) {
+        return commentService.getComments(eventId, from, size).stream()
+                .map(CommentMapper::toFullCommentDto).collect(Collectors.toList());
     }
 }
